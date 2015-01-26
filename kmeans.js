@@ -60,7 +60,6 @@ function handleFiles(files) {
       }
 
 
-
       var canvas = document.getElementById('canvas');
       var ctx = canvas.getContext("2d");
 
@@ -68,6 +67,31 @@ function handleFiles(files) {
       canvas.height = height;
 
       ctx.drawImage(img, 0, 0, width, height);
+
+      var myImageData = ctx.getImageData(0, 0, width, height);
+      var data = myImageData.data;
+
+      // iterate over all pixels
+      var pixels = [];
+
+      // iterate over all pixels based on x and y coordinates
+      for(var y = 0; y < height; y++) {
+        // loop through each column
+        for(var x = 0; x < width; x++) {
+          var red = data[((width * y) + x) * 4];
+          var green = data[((width * y) + x) * 4 + 1];
+          var blue = data[((width * y) + x) * 4 + 2];
+          var alpha = data[((width * y) + x) * 4 + 3];
+          pixels.push({r: red, g: green, b: blue, a: alpha, x: x, y: y});
+        }
+      }
+
+
+      console.log(pixels.length);
+
+      // load pixels into 3d as cubes in correct coordinates
+      // have a button you can click to explode them into histogram
+
     }
     reader.readAsDataURL(file);
 
