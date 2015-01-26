@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore.js"></script>
+    <script src="three/build/three.js"></script>
+    <script src="three/examples/js/renderers/CSS3DRenderer.js"></script>
+    <style>
+      .element {
+      width: 120px;
+      height: 160px;
+      box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
+      border: 1px solid rgba(127,255,255,0.25);
+      text-align: center;
+      cursor: default;
+      }
+      #dropbox{
+      width: 30%;
+      height: 200px;
+      background-color: green;
+      display: inline-block;
+      }
+      #preview{
+      width: 30%;
+      height: 200px;
+      background-color: lightblue;
+      float:right;
+      }
+      #canvas-div{
+      background-color: lightgrey;
+      }
+      #canvas{
+      background-color: pink;
+      }
+    </style>
+
+  </head>
+  <body>
+    <div id='dropbox'>
+      Drag and drop files here!
+    </div>
+    <div id='preview'>
+      Preview here!
+    </div>
+    <div id='canvas-div'>
+      <canvas id="canvas" width="150" height="150"></canvas>
+    </div>
+    <div id='container'>
+    </div>
+    <script src="b3.js"></script>
+    <script src="kmeans.js"></script>
+  </body>
+</html>
