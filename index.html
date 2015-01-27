@@ -5,33 +5,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore.js"></script>
     <script src="three/build/three.js"></script>
     <script src="three/examples/js/renderers/CSS3DRenderer.js"></script>
+    <script src="three/examples/js/controls/TrackballControls.js"></script>
+    <script src="tween.js"></script>
     <style>
-      .element {
-      width: 120px;
-      height: 160px;
-      box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
-      border: 1px solid rgba(127,255,255,0.25);
-      text-align: center;
-      cursor: default;
-      }
-      #dropbox{
-      width: 30%;
-      height: 200px;
-      background-color: green;
-      display: inline-block;
-      }
-      #preview{
-      width: 30%;
-      height: 200px;
-      background-color: lightblue;
-      float:right;
-      }
-      #canvas-div{
-      background-color: lightgrey;
-      }
-      #canvas{
-      background-color: pink;
-      }
+     .element {
+       width: 120px;
+       height: 160px;
+       box-shadow: 0px 0px 12px rgba(0,255,255,0.5);
+       border: 1px solid rgba(127,255,255,0.25);
+       text-align: center;
+       cursor: default;
+     }
+     #dropbox{
+       width: 30%;
+       height: 200px;
+       background-color: green;
+       display: inline-block;
+     }
+
+     #canvas-div{
+       background-color: lightgrey;
+       float: right;
+     }
+     #canvas{
+       float: left;
+       background-color: pink;
+     }
+     #rejigger{
+       width: 100px;
+       height: 40px;
+     }
     </style>
 
   </head>
@@ -39,10 +42,10 @@
     <div id='dropbox'>
       Drag and drop files here!
     </div>
-    <div id='preview'>
-      Preview here!
-    </div>
+    <input id='rejigger' value='explode!' type='button' onclick='explode()'/>
+    <input id='unjigger' value='implode!' type='button' onclick='implode()'/>
     <div id='canvas-div'>
+
       <canvas id="canvas" width="150" height="150"></canvas>
     </div>
     <div id='container'>

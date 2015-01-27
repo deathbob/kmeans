@@ -1,4 +1,5 @@
 var dropbox;
+var pixels = [];
 
 dropbox = document.getElementById("dropbox");
 dropbox.addEventListener("dragenter", dragenter, false);
@@ -71,8 +72,8 @@ function handleFiles(files) {
       var myImageData = ctx.getImageData(0, 0, width, height);
       var data = myImageData.data;
 
-      // iterate over all pixels
-      var pixels = [];
+
+      pixels = [];
 
       // iterate over all pixels based on x and y coordinates
       for(var y = 0; y < height; y++) {
@@ -82,12 +83,14 @@ function handleFiles(files) {
           var green = data[((width * y) + x) * 4 + 1];
           var blue = data[((width * y) + x) * 4 + 2];
           var alpha = data[((width * y) + x) * 4 + 3];
-          pixels.push({r: red, g: green, b: blue, a: alpha, x: x, y: y});
+          var color = "rgb(" + red + "," + green + "," + blue + ")"
+          pixels.push({r: red, g: green, b: blue, a: alpha, x: x, y: height - y, color: color});
         }
       }
 
 
       console.log(pixels.length);
+      allCubes(pixels);
 
       // load pixels into 3d as cubes in correct coordinates
       // have a button you can click to explode them into histogram
