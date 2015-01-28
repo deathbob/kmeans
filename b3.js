@@ -53,10 +53,29 @@ var squareSize = 10;
 var geometry = new THREE.BoxGeometry( squareSize, squareSize, squareSize );
 
 var cubes = [];
+var squareMulti = (squareSize / 2);
+var centroidMulti = 255 * squareMulti;
 
-var centroidMulti = 255 * (squareSize / 2);
 
 var centroids = [
+  {
+    x: Math.random() * centroidMulti,
+    y: Math.random() * centroidMulti,
+    z: Math.random() * centroidMulti,
+    pixels: []
+  },
+  {
+    x: Math.random() * centroidMulti,
+    y: Math.random() * centroidMulti,
+    z: Math.random() * centroidMulti,
+    pixels: []
+  },
+  {
+    x: Math.random() * centroidMulti,
+    y: Math.random() * centroidMulti,
+    z: Math.random() * centroidMulti,
+    pixels: []
+  },
   {
     x: Math.random() * centroidMulti,
     y: Math.random() * centroidMulti,
@@ -99,7 +118,7 @@ function allCubes(pixels){
 
   centroids.forEach(function(centroid){
     var geometry = new THREE.SphereGeometry(50);
-    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    var material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.6} );
     var sphere = new THREE.Mesh( geometry, material );
     sphere.position.x = centroid.x
     sphere.position.y = centroid.y
@@ -110,7 +129,7 @@ function allCubes(pixels){
 }
 
 function explode(){
-  var szt = squareSize / 2;
+  var szt = squareMulti;
   var pixel;
   var target;
   var cube;
@@ -174,6 +193,7 @@ function kMeansIter(){
 }
 
 function centroidsRecompute(){
+  kMeansIter();
   centroids.forEach(function(centroid){
     var pixel_length = centroid.pixels.length
     var x, y, z;
@@ -183,13 +203,22 @@ function centroidsRecompute(){
       z = centroid.pixels.reduce(function(prev, curr){ return prev + cubes[curr].position.z }, 0) / pixel_length
     }
     var target = {x: x, y: y, z: z};
-    var col = "rgb(" + x + "," + y + "," + z + ")"
+
     var tween = new TWEEN.Tween(centroid.sphere.position)
         .to(target, 2000)
         .onUpdate( function() {
           centroid.sphere.position.x = this.x;
           centroid.sphere.position.y = this.y;
           centroid.sphere.position.z = this.z;
+          var fox, box, cox;
+          rox = Math.round(this.x / squareMulti);
+          gox = Math.round(this.y / squareMulti);
+          box = Math.round(this.z / squareMulti);
+          var col = "rgb(" + rox + "," + gox + "," + box + ")"
+          //magic nuber dividing pixel length here.
+          // really ought to make radius the size of hte most distant pixel owned by this centroid
+          centroid.sphere.geometry = new THREE.SphereGeometry(centroid.pixels.length / 10);
+          centroid.sphere.material.color.set(col);
         })
         .start();
 
