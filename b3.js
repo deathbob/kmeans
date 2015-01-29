@@ -2,7 +2,9 @@
 //scene and camera
 
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 5000 );
+var maxIters = 2;
+var thisIter = 1;
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
 camera.position.x = 400;
 camera.position.y = 800;
 camera.position.z = 2500;
@@ -110,7 +112,7 @@ function allCubes(pixels){
     cube.position.x = pixel.x * squareSize;
     cube.position.y = pixel.y * squareSize;
     cube.updateMatrix();
-//    cube.matrixAutoUpdate = false; // turn this on when moving
+    //    cube.matrixAutoUpdate = false; // turn this on when moving
     scene.add( cube );
     cubes.push(cube);
 
@@ -118,14 +120,17 @@ function allCubes(pixels){
 
   centroids.forEach(function(centroid){
     var geometry = new THREE.SphereGeometry(50);
-    var material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.6} );
+    var material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.8} );
     var sphere = new THREE.Mesh( geometry, material );
-    sphere.position.x = centroid.x
-    sphere.position.y = centroid.y
-    sphere.position.z = centroid.z
-    centroid.sphere = sphere
+    sphere.position.x = centroid.x;
+    sphere.position.y = centroid.y;
+    sphere.position.z = centroid.z;
+    centroid.sphere = sphere;
+    centroid.radius = 50;
     scene.add( sphere );
   })
+
+//  explode();
 }
 
 function explode(){
@@ -136,7 +141,7 @@ function explode(){
   for(var i = 0; i < cubes.length; i++){
     pixel = pixels[i];
     cube = cubes[i];
-//    cube.matrixAutoUpdate = true; // doesn't seem to help turning this on and off
+    //    cube.matrixAutoUpdate = true; // doesn't seem to help turning this on and off
     target = {
       x:  pixel.r * szt,
       y:  pixel.g * szt,
@@ -149,10 +154,10 @@ function explode(){
           cube.position.y = this.y;
           cube.position.z = this.z;
         })
-        // .onComplete( function(){
-        //   console.log("explode complete!");
-        //   cube.matrixAutoUpdate = false;
-        // })
+    // .onComplete( function(){
+    //   console.log("explode complete!");
+    //   cube.matrixAutoUpdate = false;
+    // })
         .start();
   }
 }
@@ -181,12 +186,37 @@ function kMeansIter(){
     })
   })
   //  clear centroid pixels array between iters
-  centroids.forEach(function(cen){ cen.pixels = [] });
+  centroids.forEach(function(cen){
+    cen.old_pixels_length = pixels.length;
+    cen.pixels = []
+    cen.distances = []
+  });
+
   var mindexs = distances.map(function(distances_array, pixel_index){
     var l_min = _.min(distances_array);
     var closest_centroid = distances_array.indexOf(l_min);
     centroids[closest_centroid].pixels.push(pixel_index)
+    centroids[closest_centroid].distances.push(l_min)
   })
+
+
+  // culling
+  console.log("Centroid length before ", centroids.length);
+  // remove sphere from scene if no pixels associated with it
+  var deadCentroids = _.filter(centroids, function(cen){
+    return 0 == cen.pixels.length;
+  });
+  deadCentroids.forEach(function(cen){
+    scene.remove(cen.sphere);
+  })
+
+  // set centroids array to only centroids with pixels
+  centroids = _.filter(centroids, function(cen){
+    return cen.pixels.length > 0;
+  });
+console.log("Centroid length after ", centroids.length);
+  // end culling
+
 
   // reduce pixels distances for each centroid, recompute
   return true;
@@ -194,6 +224,7 @@ function kMeansIter(){
 
 function centroidsRecompute(){
   kMeansIter();
+
   centroids.forEach(function(centroid){
     var pixel_length = centroid.pixels.length
     var x, y, z;
@@ -217,17 +248,63 @@ function centroidsRecompute(){
           var col = "rgb(" + rox + "," + gox + "," + box + ")"
           //magic nuber dividing pixel length here.
           // really ought to make radius the size of hte most distant pixel owned by this centroid
-          centroid.sphere.geometry = new THREE.SphereGeometry(centroid.pixels.length / 10);
+          centroid.color = col;
           centroid.sphere.material.color.set(col);
         })
         .start();
+    var oldRadius = centroid.sphere.geometry.boundingSphere.radius;
+    var newRadius = _.max(centroid.distances) * 0.5 ;
+    var radRatio = newRadius / oldRadius ;
+    // console.log("Old Radius " + oldRadius);
+    // console.log("New Radius " + newRadius);
+    // console.log("Rad Ratio " + radRatio);
+    // console.log("Centroid.sphere.scale " + centroid.sphere.scale);
 
-//    centroid.x = x;
-//    centroid.y = y;
-//    centroid.z = z;
+    var oldScale = centroid.sphere.scale.x;
+    var scaleTarget = {
+      x: radRatio * oldScale,
+      y: radRatio * oldScale,
+      z: radRatio * oldScale
+    }
+//    console.log("Scale Target ", scaleTarget)
+//    console.log("Centroid.sphere.scale ", centroid.sphere.scale);
+    var radiusTarget = {
+      radius: newRadius
+    }
+    var tweenTwo = new TWEEN.Tween({radius: centroid.radius})
+        .to({radius: newRadius}, 2000)
+        .onUpdate( function(){
+          centroid.sphere.geometry = new THREE.SphereGeometry(this.radius);
+          centroid.radius = this.radius;
+        })
+        .onComplete(function(){
+          var isCentroidPrime = centroid == centroids[0];
+          var notExceededMaxIters = !(thisIter > maxIters);
+          if(isCentroidPrime){
+            if(notExceededMaxIters){
+              console.log("This iter: ", thisIter, "maxIters: ", maxIters);
+              setTimeout(function(){
+                console.log("About to recompute again!");
+                thisIter++;
+                centroidsRecompute();
+              }, 1000);
+            }else{
+              showFinalAnswer();
+            }
+          }
+        })
+        .start();
+
+
   });
   return true
+}
 
+function showFinalAnswer(){
+  centroids.forEach(function(cen){
+    var newSpan = "<span class='swatch' style='background-color: " + cen.color + "'> " + cen.color +" </span>";
+    $("#final-answer").append(newSpan);
+  })
 }
 
 function implode(){
@@ -237,7 +314,7 @@ function implode(){
   for(var i = 0; i < cubes.length; i++){
     pixel = pixels[i];
     cube = cubes[i];
-//    cube.matrixAutoUpdate = true;
+    //    cube.matrixAutoUpdate = true;
     target = {
       x:  pixel.x * squareSize,
       y:  pixel.y * squareSize,
@@ -250,10 +327,10 @@ function implode(){
           cube.position.y = this.y;
           cube.position.z = this.z;
         })
-        // .onComplete( function(){
-        //   console.log("implode complete!");
-        //   cube.matrixAutoUpdate = false;
-        // })
+    // .onComplete( function(){
+    //   console.log("implode complete!");
+    //   cube.matrixAutoUpdate = false;
+    // })
         .start();
   }
 
