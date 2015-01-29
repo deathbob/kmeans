@@ -24,10 +24,9 @@
 
      #canvas-div{
        background-color: lightgrey;
-       float: right;
      }
      #canvas{
-       float: left;
+       float:left;
        background-color: pink;
      }
      #rejigger{
@@ -36,25 +35,48 @@
      }
      .swatch{
        display: inline-block;
-       width: 200px;
+       width: 180px;
        height: 50px;
+     }
+     #iterations{
+       float: right;
      }
     </style>
 
   </head>
   <body>
     <div id='dropbox'>
-      Drag and drop files here!
+      <p>
+        Hope you're using chrome! Wish this worked on FF but oh well!
+      </p>
+      <ol>
+        <li>Drag and drop an image (jpg, png) file here! </li>
+        <li>Then click explode!</li>
+        <li>Then click centroidsRecompute!</li>
+        <li>Some pictures work better than others, try a few!</li>
+        <li>Might have to refresh the page if things get crazy!</li>
+      </ol>
+    </div>
+
+    <div id='iterations'>
+      <div id='words'>
+        You can zoom, and click+drag to move view around.  hold down 'd' and click+drag to pan.
+      </div>
+      <div id='canvas-div'>
+        <canvas id="canvas" width="150" height="150"></canvas>
+      </div>
+
+      There are <span id='iterations-left'>some</span> iterations left!
+
+
+      <div id='controls'>
+        <input id='rejigger' value='explode!' type='button' onclick='explode()'/>
+        <input id='unjigger' value='implode!' type='button' onclick='implode()'/>
+        <!--    <input id='kmeansiter' value='kmeansiter' type='button' onclick='kMeansIter()'/> -->
+        <input id='centroidsRecompute' value='centroidsRecompute!' type='button' onclick='centroidsRecompute()'/>
+      </div>
     </div>
     <div id='final-answer'></div>
-    <input id='rejigger' value='explode!' type='button' onclick='explode()'/>
-    <input id='unjigger' value='implode!' type='button' onclick='implode()'/>
-<!--    <input id='kmeansiter' value='kmeansiter' type='button' onclick='kMeansIter()'/> -->
-    <input id='centroidsRecompute' value='centroidsRecompute!' type='button' onclick='centroidsRecompute()'/>
-    <div id='canvas-div'>
-
-      <canvas id="canvas" width="150" height="150"></canvas>
-    </div>
     <div id='container'>
     </div>
     <script src="b3.js"></script>

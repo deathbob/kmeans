@@ -130,7 +130,7 @@ function allCubes(pixels){
     scene.add( sphere );
   })
 
-//  explode();
+  //  explode();
 }
 
 function explode(){
@@ -200,22 +200,26 @@ function kMeansIter(){
   })
 
 
-  // culling
-  console.log("Centroid length before ", centroids.length);
-  // remove sphere from scene if no pixels associated with it
-  var deadCentroids = _.filter(centroids, function(cen){
-    return 0 == cen.pixels.length;
-  });
-  deadCentroids.forEach(function(cen){
-    scene.remove(cen.sphere);
-  })
 
-  // set centroids array to only centroids with pixels
-  centroids = _.filter(centroids, function(cen){
-    return cen.pixels.length > 0;
-  });
-console.log("Centroid length after ", centroids.length);
-  // end culling
+  if(thisIter > 2){
+    // culling
+    console.log("Centroid length before ", centroids.length);
+    // remove sphere from scene if no pixels associated with it
+    var deadCentroids = _.filter(centroids, function(cen){
+      return 0 == cen.pixels.length;
+    });
+    deadCentroids.forEach(function(cen){
+      scene.remove(cen.sphere);
+    })
+
+    // set centroids array to only centroids with pixels
+
+    centroids = _.filter(centroids, function(cen){
+      return cen.pixels.length > 0;
+    });
+    console.log("Centroid length after ", centroids.length);
+    // end culling
+  }
 
 
   // reduce pixels distances for each centroid, recompute
@@ -266,8 +270,8 @@ function centroidsRecompute(){
       y: radRatio * oldScale,
       z: radRatio * oldScale
     }
-//    console.log("Scale Target ", scaleTarget)
-//    console.log("Centroid.sphere.scale ", centroid.sphere.scale);
+    //    console.log("Scale Target ", scaleTarget)
+    //    console.log("Centroid.sphere.scale ", centroid.sphere.scale);
     var radiusTarget = {
       radius: newRadius
     }
@@ -279,15 +283,14 @@ function centroidsRecompute(){
         })
         .onComplete(function(){
           var isCentroidPrime = centroid == centroids[0];
-          var notExceededMaxIters = !(thisIter > maxIters);
+          var notExceededMaxIters = !(thisIter >= maxIters);
           if(isCentroidPrime){
+            $("#iterations-left").html( maxIters - thisIter);
             if(notExceededMaxIters){
-              console.log("This iter: ", thisIter, "maxIters: ", maxIters);
               setTimeout(function(){
-                console.log("About to recompute again!");
                 thisIter++;
                 centroidsRecompute();
-              }, 1000);
+              }, 500);
             }else{
               showFinalAnswer();
             }
@@ -301,8 +304,9 @@ function centroidsRecompute(){
 }
 
 function showFinalAnswer(){
+  $("final-answer").append("<p>Color Centers!</p>")
   centroids.forEach(function(cen){
-    var newSpan = "<span class='swatch' style='background-color: " + cen.color + "'> " + cen.color +" </span>";
+    var newSpan = "<div class='swatch' style='background-color: " + cen.color + "'> " + cen.color + "<br/> owns " + cen.pixels.length + " pixels </span>";
     $("#final-answer").append(newSpan);
   })
 }
