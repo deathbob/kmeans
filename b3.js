@@ -2,7 +2,7 @@
 //scene and camera
 
 var scene = new THREE.Scene();
-var maxIters = 2;
+var maxIters = 10;
 var thisIter = 1;
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
 camera.position.x = 400;
